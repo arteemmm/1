@@ -1,0 +1,50 @@
+from pygame import *
+
+class GameSrite(sprite.Sprite):
+      def __init__(self, filename, x, y, speed, width, height):
+          super().__init__()
+          self.image = transform.scale(image.load(filename),(width, height))
+          self.speed = speed
+          self.rect = self.image.get_rect()
+          self.rect.x = x
+          self.rect.y = y
+  
+      def reset(self):
+          window.blit(self.image, (self.rect.x, self.rect.y))
+class Player(GameSrite):
+    def update(self):
+        key_presed = key.get_pressed()
+        if key_presed[K_s] and self.rect.y < height - self.image.get_height():
+            self.rect.y += self.speed
+        if key_presed[K_w] and self.rect.y > 0:
+            self.rect.y -= self.speed   
+
+
+
+width = 900
+height = 500
+
+window = display.set_mode((width,height))
+display.set_caption('a')
+background = transform.scale(image.load('backgound.png'),(width,height))
+clock = time.Clock()
+FPS = 60
+
+player1 = Player('player1.jpg', 20, 200, 10, 25, 100)
+
+
+
+game = True
+finish = False
+while game:
+    for e in event.get():
+        if e.type == QUIT:
+            game = False
+
+    if finish!=True:
+        window.blit(background,(0,0))
+        player1.reset()
+        player1.update()
+
+    display.update()
+    clock.tick(FPS)
