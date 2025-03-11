@@ -18,7 +18,19 @@ class Player(GameSrite):
             self.rect.y += self.speed
         if key_presed[K_w] and self.rect.y > 0:
             self.rect.y -= self.speed   
-
+class Enemy(GameSrite):
+    def update(self):
+        key_presed = key.get_pressed()
+        if key_presed[K_e] and self.rect.y < height - self.image.get_height():
+            self.rect.y +=self.speed
+        if key_presed[K_d] and self.rect.y > 0:
+            self.rect.y -= self.speed
+class Ball(GameSrite):
+    def update(self):
+        global lost
+        self.rect.y += self.speed
+        if self.rect.y > height or self.rect.y < 0:
+            self.seed *= -1
 
 
 width = 900
@@ -31,8 +43,8 @@ clock = time.Clock()
 FPS = 60
 
 player1 = Player('player1.jpg', 20, 200, 10, 25, 100)
-
-
+player2 = Enemy('player1.jpg', 850, 200, 10, 25, 100)
+ball = Ball('player1.jpg', 450, 250, 3, 20,20)
 
 game = True
 finish = False
@@ -45,6 +57,13 @@ while game:
         window.blit(background,(0,0))
         player1.reset()
         player1.update()
+        ball.reset()
+        ball.update()
+        player2.reset()
+        ball.update()
 
+
+        
+    
     display.update()
     clock.tick(FPS)
