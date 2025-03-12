@@ -67,3 +67,43 @@ while game:
     
     display.update()
     clock.tick(FPS)
+
+
+
+
+
+
+
+
+
+
+class Player(GameSprite):
+    def __init__(self, x, y, image, up_key, down_key):
+        super().__init__(image, x, y)
+        self.up_key = up_key
+        self.down_key = down_key
+
+    def update(self, keys):
+        if keys[self.up_key]:
+            self.rect.y -= 10
+        elif keys[self.down_key]:
+            self.rect.y += 10
+
+        # Ограничиваем положение ракеток экраном
+        if self.rect.top < 0:
+            self.rect.top = 0
+        elif self.rect.bottom > HEIGHT:
+            self.rect.bottom = HEIGHT
+
+class Ball(GameSprite):
+    def __init__(self, x, y, image, speed_x=5, speed_y=5):
+        super().__init__(image, x, y, speed_x, speed_y)
+
+    def update(self):
+        super().update()
+        
+        # Проверка границ экрана
+        if self.rect.left < 0 or self.rect.right > WIDTH:
+            self.speed_x *= -1
+        if self.rect.top < 0 or self.rect.bottom > HEIGHT:
+            self.speed_y *= -1
