@@ -12,29 +12,53 @@ class GameSrite(sprite.Sprite):
       def reset(self):
           window.blit(self.image, (self.rect.x, self.rect.y))
 class Player(GameSrite):
+    def __init__(self, filename, x, y, speed, width, height, up_key, down_key):
+        super().__init__(filename, x, y, speed, width, height)
+        self.up_key = up_key
+        self.down_key = down_key
     def update(self):
         key_presed = key.get_pressed()
-        if key_presed[K_s] and self.rect.y < height - self.image.get_height():
+        if key_presed[self.down_key] and self.rect.y < height - self.image.get_height():
             self.rect.y += self.speed
-        if key_presed[K_w] and self.rect.y > 0:
+        if key_presed[self.up_key] and self.rect.y > 0:
             self.rect.y -= self.speed   
-class Enemy(GameSrite):
-    def update(self):
-        key_presed = key.get_pressed()
-        if key_presed[K_e] and self.rect.y < height - self.image.get_height():
-            self.rect.y +=self.speed
-        if key_presed[K_d] and self.rect.y > 0:
-            self.rect.y -= self.speed
+
 class Ball(GameSrite):
+    def __init__(self, filename, x, y, speed, width, height):
+        super().__init__(filename, x, y, speed, width, height)
+        self.speed_y = speed    
+        self.speed_x = speed
     def update(self):
-        global lost
-        self.rect.y += self.speed
+        global score1
+        global score2
+        self.rect.x -= self.speed_x
+        self.rect.y += self.speed_y
         if self.rect.y > height or self.rect.y < 0:
-            self.seed *= -1
+            self.speed_y *= -1
+        
+        if sprite.collide_rect(ball, player1):
+            self.speed_x *= -1
+        elif sprite.collide_rect(ball, player2):
+            self.speed_x *= -1
+
+        if self.rect.x < 0:
+            score2 += 1
+            self.speed_x *= -1
+            self.rect.x = 450
+            self.rect.y = 250
+        elif self.rect.x > width:
+            score1 += 1
+            self.speed_x *= -1
+            self.rect.x = 450
+            self.rect.y = 250
+            
 
 
 width = 900
 height = 500
+
+score1 =0
+score2 =0
 
 window = display.set_mode((width,height))
 display.set_caption('a')
@@ -42,9 +66,14 @@ background = transform.scale(image.load('backgound.png'),(width,height))
 clock = time.Clock()
 FPS = 60
 
-player1 = Player('player1.jpg', 20, 200, 10, 25, 100)
-player2 = Enemy('player1.jpg', 850, 200, 10, 25, 100)
-ball = Ball('player1.jpg', 450, 250, 3, 20,20)
+font.init()
+font = font.Font(None,50)
+
+
+
+player1 = Player('player.jpg', 20, 200, 10, 25, 100, K_w,K_s)
+player2 = Player('player.jpg', 850, 200, 10, 25, 100, K_UP, K_DOWN)
+ball = Ball('player.jpg', 450, 250, 3, 20,20)
 
 game = True
 finish = False
@@ -60,50 +89,15 @@ while game:
         ball.reset()
         ball.update()
         player2.reset()
+        player2.update()
         ball.update()
 
-
+        player1_score = font.render(str(score1)+':',True, (255,255,255))
+        window.blit(player1_score,(435,20))
+        player2_score = font.render(str(score2),True, (255,255,255))
+        window.blit(player2_score,(467,20))
         
-    
+
+
     display.update()
     clock.tick(FPS)
-
-
-
-
-
-
-
-
-
-
-class Player(GameSprite):
-    def __init__(self, x, y, image, up_key, down_key):
-        super().__init__(image, x, y)
-        self.up_key = up_key
-        self.down_key = down_key
-
-    def update(self, keys):
-        if keys[self.up_key]:
-            self.rect.y -= 10
-        elif keys[self.down_key]:
-            self.rect.y += 10
-
-        # Ограничиваем положение ракеток экраном
-        if self.rect.top < 0:
-            self.rect.top = 0
-        elif self.rect.bottom > HEIGHT:
-            self.rect.bottom = HEIGHT
-
-class Ball(GameSprite):
-    def __init__(self, x, y, image, speed_x=5, speed_y=5):
-        super().__init__(image, x, y, speed_x, speed_y)
-
-    def update(self):
-        super().update()
-        
-        # Проверка границ экрана
-        if self.rect.left < 0 or self.rect.right > WIDTH:
-            self.speed_x *= -1
-        if self.rect.top < 0 or self.rect.bottom > HEIGHT:
-            self.speed_y *= -1
