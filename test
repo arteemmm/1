@@ -96,8 +96,8 @@ while game:
         window.blit(player1_score,(435,20))
         player2_score = font.render(str(score2),True, (255,255,255))
         window.blit(player2_score,(467,20))
-        
-
+        if score1 >= 9 or score2 >=9:
+            finish = True    
 
     display.update()
     clock.tick(FPS)
