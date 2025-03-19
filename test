@@ -1,3 +1,4 @@
+from typing import Any
 from pygame import *
 
 class GameSrite(sprite.Sprite):
@@ -40,6 +41,8 @@ class Ball(GameSrite):
             self.speed_x *= -1
         elif sprite.collide_rect(ball, player2):
             self.speed_x *= -1
+        elif sprite.collide_rect(ball, bot):
+            self.speed_x *= -1
 
         if self.rect.x < 0:
             score2 += 1
@@ -51,8 +54,14 @@ class Ball(GameSrite):
             self.speed_x *= -1
             self.rect.x = 450
             self.rect.y = 250
-            
-
+    
+class Bot(GameSrite):
+    def update(self):
+        self.rect.y += self.speed
+        if self.rect.y <= 0:
+            self.speed *= -1
+        if self.rect.y >= height - 100:
+            self.speed *= -1
 
 width = 900
 height = 500
@@ -74,13 +83,26 @@ font = font.Font(None,50)
 player1 = Player('player.jpg', 20, 200, 10, 25, 100, K_w,K_s)
 player2 = Player('player.jpg', 850, 200, 10, 25, 100, K_UP, K_DOWN)
 ball = Ball('player.jpg', 450, 250, 3, 20,20)
+bot = Bot('player.jpg',850, 200, 10, 25, 100)
 
 game = True
-finish = False
+finish = True
 while game:
     for e in event.get():
         if e.type == QUIT:
             game = False
+    key_presed = key.get_pressed()
+    if key_presed[K_1]:
+        finish = False
+        if finish!=True:
+            bot.update()
+            bot.reset()
+    if key_presed[K_2]:
+        finish = False
+        if finish!=True:
+            player2.reset()
+            player2.update()
+
 
     if finish!=True:
         window.blit(background,(0,0))
@@ -88,9 +110,8 @@ while game:
         player1.update()
         ball.reset()
         ball.update()
-        player2.reset()
-        player2.update()
-        ball.update()
+
+
 
         player1_score = font.render(str(score1)+':',True, (255,255,255))
         window.blit(player1_score,(435,20))
