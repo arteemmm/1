@@ -1,0 +1,152 @@
+from typing import Any
+from pygame import *
+
+class GameSrite(sprite.Sprite):
+      def __init__(self, filename, x, y, speed, width, height):
+          super().__init__()
+          self.image = transform.scale(image.load(filename),(width, height))
+          self.speed = speed
+          self.rect = self.image.get_rect()
+          self.rect.x = x
+          self.rect.y = y
+  
+      def reset(self):
+          window.blit(self.image, (self.rect.x, self.rect.y))
+
+class Player(GameSrite):
+    def __init__(self, filename, x, y, speed, width, height, up_key, down_key):
+        super().__init__(filename, x, y, speed, width, height)
+        self.up_key = up_key
+        self.down_key = down_key
+    def update(self):
+        key_presed = key.get_pressed()
+        if key_presed[self.down_key] and self.rect.y < height - self.image.get_height():
+            self.rect.y += self.speed
+        if key_presed[self.up_key] and self.rect.y > 0:
+            self.rect.y -= self.speed   
+
+class Ball(GameSrite):
+    def __init__(self, filename, x, y, speed, width, height):
+        super().__init__(filename, x, y, speed, width, height)
+        self.speed_y = speed    
+        self.speed_x = speed
+    def update(self):
+        global score1
+        global score2
+        self.rect.x -= self.speed_x
+        self.rect.y += self.speed_y
+        if self.rect.y > height or self.rect.y < 0:
+            self.speed_y *= -1
+        
+        if sprite.collide_rect(ball, player1):
+            self.speed_x *= -1
+        elif sprite.collide_rect(ball, player2):
+            self.speed_x *= -1
+        elif sprite.collide_rect(ball, bot_easy):
+            self.speed_x *= -1
+        elif sprite.collide_rect(ball, bot_hard):
+            self.speed_x *= -1
+
+        if self.rect.x < 0:
+            score2 += 1
+            self.speed_x *= -1
+            self.rect.x = 450
+            self.rect.y = 250
+        elif self.rect.x > width:
+            score1 += 1
+            self.speed_x *= -1
+            self.rect.x = 450
+            self.rect.y = 250
+class Bot_EASY(GameSrite):
+    def update(self):
+        self.rect.y += self.speed
+        if self.rect.y >= 0:
+            self.speed *= -1
+        if self.rect.y <= height - 75:
+            self.speed *= -1
+class Bot_HARD(GameSrite):
+    def update(self):
+        self.rect.y = ball.rect.y - 25
+
+width = 900
+height = 500
+
+score1 =0
+score2 =0
+
+window = display.set_mode((width,height))
+display.set_caption('a')
+background = transform.scale(image.load('backgound.png'),(width,height))
+clock = time.Clock()
+FPS = 60
+
+font.init()
+font = font.Font(None,50)
+
+mixer.init()
+mixer.music.load('background_music.mp3')
+mixer.music.play()
+
+player1 = Player('player.jpg', 20, 200, 10, 25, 100, K_w,K_s)
+player2 = Player('player.jpg', 850, 200, 10, 25, 100, K_UP, K_DOWN)
+ball = Ball('player.jpg', 450, 250, 4, 20,20)
+bot_easy = Bot_EASY('player.jpg',850, 200, 5, 25, 100)
+bot_hard = Bot_HARD('player.jpg',850, 200, 10, 25, 100)
+
+mode = 0
+
+game = True
+finish = True
+
+while game:
+    for e in event.get():
+        if e.type == QUIT:
+            game = False
+        elif e.type == KEYDOWN:
+            if e.key == K_1:
+                finish = False
+                mode = 1
+                score1 = 0
+                score2 = 0
+            elif e.key == K_2:
+                finish = False
+                mode = 2
+                score1 = 0
+                score2 = 0      
+            elif e.key == K_3:
+                finish = False
+                mode = 3
+                score1 = 0
+                score2 = 0
+    if finish != True:
+        window.blit(background,(0,0))
+        player1.reset()
+        player1.update()
+        ball.reset()
+        if mode == 1:
+            bot_easy.update()
+            bot_easy.reset()
+        elif mode == 2:
+            bot_hard.update()
+            bot_hard.reset() 
+        else:
+            player2.reset()
+            player2.update()
+
+        player1_score = font.render(str(score1)+':',True, (255,255,255))
+        window.blit(player1_score,(435,20))
+        player2_score = font.render(str(score2),True, (255,255,255))
+        window.blit(player2_score,(467,20))
+        if score1 >= 9 or score2 >=9:
+            finish = True    
+        ball.update()
+    else:
+        gamemode1 = font.render('1 - лёгкий бот', True,(255,255,255))
+        gamemode2 = font.render('2 - сложный бот',True,(255,255,255))
+        gamemode3 = font.render('3 - на двоих',True,(255,255,255))
+        window.blit(gamemode1,(350,50))
+        window.blit(gamemode2,(350,100))
+        window.blit(gamemode3,(350,150))
+
+    display.update()
+    clock.tick(FPS)
